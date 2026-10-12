@@ -20,18 +20,10 @@ logger = logging.getLogger(__name__)
 # Flask
 app = Flask(__name__)
 
-# async def error_handler(update, context):
-#
-#     logger.error(f"Error handling the update: {context.error}")
 
-# def main():
-#     # === Проверка конфигурации ===
-#     if not config.TOKEN or not config.DEEPL_AUTH_KEY:
-#         logger.error("❌ Bot token or DeepL key is missing in config.py")
-#         return
 
     # === Создаём Telegram-приложение ===
-telegram_app = ApplicationBuilder().token(config.TOKEN).updater(None).build()
+telegram_app = ApplicationBuilder().token(config.TOKEN).build()
 
     # === Инициализируем DeepL и сохраняем в контекст ===
 telegram_app.bot_data["deepl_service"] = DeeplService(config.DEEPL_AUTH_KEY)
@@ -59,9 +51,6 @@ telegram_app.add_error_handler(error_handler)
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 
-# initialize Application ONCE
-loop.run_until_complete(telegram_app.initialize())
-
 # ===== Webhook
 @app.route(f"/{config.TOKEN}", methods=["POST"])
 def webhook():
@@ -79,3 +68,6 @@ def webhook():
 @app.route("/")
 def index():
     return "Telegram Bot is running", 200
+
+if __name__ == "__main__":
+    telegram_app.run_polling(drop_pending_updates=True)
